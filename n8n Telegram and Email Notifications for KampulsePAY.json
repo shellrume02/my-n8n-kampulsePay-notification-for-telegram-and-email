@@ -1,0 +1,341 @@
+{
+  "name": "Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "notify",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -960,
+        1936
+      ],
+      "id": "795cff10-d8f3-4189-86ce-52e5d89b6549",
+      "name": "Webhook",
+      "webhookId": "5b93d275-0401-43de-882b-d8c913fca7c5"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.body.event }}",
+                    "rightValue": "kyc_submitted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4a6b1d88-3618-4090-818c-4ce9aca60637"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5320f74e-59d1-4bb4-985d-2a092c254d1a",
+                    "leftValue": "={{ $json.body.body.event }}",
+                    "rightValue": "buy_trade",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7c2d19c8-251e-4311-bb46-6276fd8ab44d",
+                    "leftValue": "={{ $json.body.body.event }}",
+                    "rightValue": "sell_trade",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "109b1140-cf40-40fc-9924-431841e47567",
+      "name": "Route by Event Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -736,
+        1904
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "6941753757",
+        "text": "={{`🆔 *NEW KYC SUBMISSION*\n\n📄 *Document Type*: ${$json.body.body.document_type}\n🧑 *User ID*: \\`${$json.body.body.user_id}\\`\n🔍 *KYC ID*: \\`${$json.body.body.kyc_id}\\`\n\n⏰ *Submitted*: ${$now.format(\"DD MMM YYYY, hh:mm A\")} WAT\n\n⚡ _Admin: Please check the document in the dashboard._\n\nThis message was sent automatically by n8n.`}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        1648
+      ],
+      "id": "a8373383-6543-449a-82ec-b0fa56e3597c",
+      "name": "Send a text message KYC node",
+      "webhookId": "781f87e0-25dc-437f-bfd5-d256bcb176ee",
+      "credentials": {
+        "telegramApi": {
+          "id": "fVMNzo6n8T45DNzF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6941753757",
+        "text": "={{`🟢 *NEW BUY TRADE*\n\n💰 *Amount*: ₦${Number($json.body.body.amount_ngn || 0).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, \",\")}\n₿ *Crypto*: ${$json.body.body.crypto_type}\n🧑 *User ID*: \\`${$json.body.body.user_id}\\`\n🆔 *Trade ID*: \\`${$json.body.body.trade_id}\\`\n\n⏰ *Time*: ${$now.format(\"DD MMM YYYY, hh:mm A\")} WAT\n\n✅ _Funds received. Processing crypto payout..._\n\nThis message was sent automatically by n8n.`}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        2032
+      ],
+      "id": "0710eb4f-ab01-4a8c-a006-a6e3234841fd",
+      "name": "Send a text message Buy Trade node",
+      "webhookId": "781f87e0-25dc-437f-bfd5-d256bcb176ee",
+      "credentials": {
+        "telegramApi": {
+          "id": "fVMNzo6n8T45DNzF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6941753757",
+        "text": "={{`🔴 *NEW SELL TRADE*\n\n💸 *Amount*: ₦${Number($json.body.body.amount_ngn || 0).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, \",\")}\n₿ *Crypto*: ${$json.body.body.crypto_type}\n🧑 *User ID*: \\`${$json.body.body.user_id}\\`\n🆔 *Trade ID*: \\`${$json.body.body.trade_id}\\`\n\n⏰ *Time*: ${$now.format(\"DD MMM YYYY, hh:mm A\")} WAT\n\n✅ _Crypto received. Sending money to bank..._\n\nThis message was sent automatically by n8n.`}}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        2416
+      ],
+      "id": "af9ae5d9-8dca-4722-9ea7-65235dcaa50d",
+      "name": "Send a text message Sell Trade Node",
+      "webhookId": "781f87e0-25dc-437f-bfd5-d256bcb176ee",
+      "credentials": {
+        "telegramApi": {
+          "id": "fVMNzo6n8T45DNzF",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer re_EJuwramG_ACLtATfoF3YT87Mj6X9ybuYN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"from\": \"notifications@kampulsepay.com\", \"to\": [\"c.e.o.broketobetter@gmail.com\"], \"subject\": \"New KYC Submission – Action Required\", \"html\": '<h2>🆔 New KYC Submission</h2><p><b>Document Type:</b> ' + $json.body.body.document_type + '</p><p><b>User ID:</b> ' + $json.body.body.user_id + '</p><p><b>KYC ID:</b> ' + $json.body.body.kyc_id + '</p><p><b>Submitted:</b> ' + $now.format('DD MMM YYYY, hh:mm A') + ' WAT</p><hr><p>This notification was sent automatically by the KampulsePay system.</p>' } }}",
+        "options": {}
+      },
+      "id": "23252407-4ae8-4640-b354-9cdda01cf053",
+      "name": "Send KYC Email via Resend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -512,
+        1456
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer re_EJuwramG_ACLtATfoF3YT87Mj6X9ybuYN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"from\": \"notifications@kampulsepay.com\",\n  \"to\": [\"c.e.o.broketobetter@gmail.com\"],\n  \"subject\": 'New Buy Trade – ' + $json.body.body.trade_id,\n  \"html\": '<h2>🟢 New Buy Trade</h2><p><b>Amount:</b> ₦' + Number($json.body.body.amount_ngn || 0).toString().replace(/\\\\B(?=(\\\\d{3})+(?!\\\\d))/g, ',') + '</p><p><b>Crypto:</b> ' + $json.body.body.crypto_type + '</p><p><b>User ID:</b> ' + $json.body.body.user_id + '</p><p><b>Trade ID:</b> ' + $json.body.body.trade_id + '</p><p><b>Time:</b> ' + $now.format('DD MMM YYYY, hh:mm A') + ' WAT</p><hr><p>Funds received. Processing crypto payout…</p>'\n} }}",
+        "options": {}
+      },
+      "id": "9fd12c55-94d8-4250-a6fc-1af3b98155cf",
+      "name": "Send Buy Trade Email via Resend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -512,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer re_EJuwramG_ACLtATfoF3YT87Mj6X9ybuYN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"from\": \"notifications@kampulsepay.com\",\n  \"to\": [\"c.e.o.broketobetter@gmail.com\"],\n  \"subject\": 'New Sell Trade – ' + $json.body.body.trade_id,\n  \"html\": '<h2>🔴 New Sell Trade</h2><p><b>Amount:</b> ₦' + Number($json.body.body.amount_ngn || 0).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',') + '</p><p><b>Crypto:</b> ' + $json.body.body.crypto_type + '</p><p><b>User ID:</b> ' + $json.body.body.user_id + '</p><p><b>Trade ID:</b> ' + $json.body.body.trade_id + '</p><p><b>Time:</b> ' + $now.format('DD MMM YYYY, hh:mm A') + ' WAT</p><hr><p>Crypto received. Sending money to bank…</p>'\n} }}",
+        "options": {}
+      },
+      "id": "173f008f-8070-485c-8e13-8a74b28e3422",
+      "name": "Send Sell Trade Email via Resend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -512,
+        2224
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Route by Event Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Event Type": {
+      "main": [
+        [
+          {
+            "node": "Send a text message KYC node",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send KYC Email via Resend",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message Buy Trade node",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Buy Trade Email via Resend",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message Sell Trade Node",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Sell Trade Email via Resend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b8ad9bca-ad5b-495d-b961-2ec196e88c11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ae971820e170cd666bdeb6af0725f8917645b6c9f9130c2cd4ac6bbfe52240fc"
+  },
+  "id": "2eiHfzU0ikXUiwcU",
+  "tags": []
+}
